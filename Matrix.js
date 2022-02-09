@@ -73,4 +73,13 @@ class Matrix {
     
     return lines;
   }
+
+  eraseLinesToClear(lines=this.detectLines()) {
+    let t = this;
+    lines.sort((a,b)=>a-b).reverse().forEach(function (i, ind, arr) {
+      t.data[i] = JSON.parse(JSON.stringify(t.emptyRow));
+    });
+    
+    return lines;
+  }
 }

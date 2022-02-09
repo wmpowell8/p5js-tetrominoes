@@ -37,7 +37,7 @@ class ScoringMessage {
     
     textFont(this.font);
 
-    text(this.text, this.isCentered ? centerX : sideX, this.position + (this.isCentered ? centerY : sideY));
+    text(this.text, this.isCentered ? centerX : sideX, this.position + (this.isCentered ? centerY : sideY) - sinceAnimStart * .005);
     
     pop();
     
