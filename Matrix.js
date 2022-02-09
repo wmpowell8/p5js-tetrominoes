@@ -1,5 +1,6 @@
 class Matrix {
-  constructor(width=10, height=20) {
+  constructor(width=10, skyline=width*2, height=skyline*2) {
+    this.skyline = skyline;
     this.emptyRow = [];
     for (let i=0; i<width; i++) this.emptyRow.push("");
     this.data = [];
@@ -28,10 +29,13 @@ class Matrix {
   }
   
   lock(t) {
+    let lockOut = true;
     for (let i of t.getCurrentShape()) {
+      if (-i.y<this.skyline) lockOut=false;
       if (this.minoAtPos(i.x, i.y)) throw {name: "Block out", message: "Tetromino must lock over empty space"};
       this.data[-i.y][i.x] = t.tetromino.color;
     }
+    if (lockOut) throw {name: "Lock out", message: "Tetromino must not lock completely above Skyline"};
   }
   
   detectLines() {
@@ -56,5 +60,7 @@ class Matrix {
       t.data.splice(i, 1);
       t.data.push(JSON.parse(JSON.stringify(t.emptyRow)));
     });
+    
+    return lines;
   }
 }
