@@ -33,4 +33,28 @@ class Matrix {
       this.data[-i.y][i.x] = t.tetromino.color;
     }
   }
+  
+  detectLines() {
+    let lines = [];
+    this.data.forEach(function (i, ind, arr) {
+      let line = true;
+      for (let j of i) {
+        if (j == "") {
+          line = false;
+          break;
+        }
+      }
+      
+      if (line) lines.push(ind);
+    });
+    return lines;
+  }
+  
+  clearLines(lines=this.detectLines()) {
+    let t = this;
+    lines.sort((a,b)=>a-b).reverse().forEach(function (i, ind, arr) {
+      t.data.splice(i, 1);
+      t.data.push(JSON.parse(JSON.stringify(t.emptyRow)));
+    });
+  }
 }
