@@ -27,4 +27,11 @@ class RS {
     this.tetrominoes = tetrominoData;
     this.rotate = rotateFunction;
   }
+  bag() {
+    let bag = [];
+    for (let i of this.tetrominoes) {
+      bag.push(new Tetromino(i, this.rotate));
+    }
+    return bag;
+  }
 }
