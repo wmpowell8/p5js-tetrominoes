@@ -1,3 +1,5 @@
+// Class for a matrix, which stores what minoes go where.
+
 class Matrix {
   constructor(width=10, skyline=width*2, height=skyline*2) {
     this.skyline = skyline;
@@ -7,27 +9,33 @@ class Matrix {
     for (let i=0; i<height; i++) this.data.push(JSON.parse(JSON.stringify(this.emptyRow)));
   }
   
+  // Gets the width of the matrix
   getWidth() {
     return this.emptyRow.length;
   }
   
+  // Gets the height of the matrix
   getHeight() {
     return this.data.length;
   }
   
+  // Gets both the width and height using the previous two functions
   getDimensions() {
     return {width: this.getWidth(), height: this.getHeight()}
   }
   
+  // Returns whether there is a mino at a given position
   minoAtPos(x,y) {
     if (y<=-this.getHeight() && x>=0 && x < this.getWidth()) return false;
     else return this.data[-y] == undefined || this.data[-y][x] == undefined ? true : this.data[-y][x] != "";
   }
   
+  // Returns what color mino there is at a given positon
   colorAtPos(x,y) {
     return this.data[-y] == undefined || this.data[-y][x] == undefined ? undefined : this.data[-y][x];
   }
   
+  // Locks a tetromino to the matrix. Accepts a PositionedTetrmomino object as input. Also is responsible for two of the game over conditions.
   lock(t) {
     let lockOut = true;
     for (let i of t.getCurrentShape()) {
@@ -38,6 +46,7 @@ class Matrix {
     if (lockOut) throw {name: "Lock out", message: "Tetromino must not lock completely above Skyline"};
   }
   
+  // Detects what lines need to be cleared.
   detectLines() {
     let lines = [];
     this.data.forEach(function (i, ind, arr) {
@@ -54,6 +63,7 @@ class Matrix {
     return lines;
   }
   
+  // Clears lines. Default for lines to clear is result from above
   clearLines(lines=this.detectLines()) {
     let t = this;
     lines.sort((a,b)=>a-b).reverse().forEach(function (i, ind, arr) {

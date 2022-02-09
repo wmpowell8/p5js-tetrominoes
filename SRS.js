@@ -1,3 +1,5 @@
+// Super Rotation System, the rotation system present in modern titles
+
 const SRS = new RS([
   /*Z*/{
     color: "red",
@@ -166,12 +168,16 @@ CCW rotations (Last list item, above)
     ]
   ]
   
+  // sets some preliminary info
+  
   let wallkicks = tetromino.wallkickOverride == undefined ? 
       defaultWallkicks :
       tetromino.wallkickOverride;
   let dir = posMod(d,4);
   let newDir = posMod((tetromino.facing + dir),4);
 
+  // everything else does the actual rotating
+  
   let o = {success: false, x: 0, y: 0};
   wallkicks[dir][tetromino.facing].forEach(function (i, ind, arr) {
     if (!o.success) {

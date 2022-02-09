@@ -1,3 +1,5 @@
+// Class for a scoring message with a cool animation
+
 class ScoringMessage {
   constructor(text, color, position, size=36, animStart=millis(), isCentered=false, font=regularFont, strokWeight=0, strokColor="white") {
     this.text=text;
@@ -10,6 +12,9 @@ class ScoringMessage {
     this.strokeColor = strokColor;
     this.font = font;
   }
+  
+  // Shows the scoring message
+  
   show(sideX, sideY, centerX=0, centerY=0) {
     push();
     
