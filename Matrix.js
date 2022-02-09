@@ -49,7 +49,7 @@ class Matrix {
   // Detects what lines need to be cleared.
   detectLines() {
     let lines = [];
-    this.data.forEach(function (i, ind, arr) {
+    this.data.forEach((i, ind, arr) => {
       let line = true;
       for (let j of i) {
         if (j == "") {
@@ -65,19 +65,17 @@ class Matrix {
   
   // Clears lines. Default for lines to clear is result from above
   clearLines(lines=this.detectLines()) {
-    let t = this;
-    lines.sort((a,b)=>a-b).reverse().forEach(function (i, ind, arr) {
-      t.data.splice(i, 1);
-      t.data.push(JSON.parse(JSON.stringify(t.emptyRow)));
+    lines.sort((a,b)=>a-b).reverse().forEach((i, ind, arr) => {
+      this.data.splice(i, 1);
+      this.data.push(JSON.parse(JSON.stringify(this.emptyRow)));
     });
     
     return lines;
   }
 
   eraseLinesToClear(lines=this.detectLines()) {
-    let t = this;
-    lines.sort((a,b)=>a-b).reverse().forEach(function (i, ind, arr) {
-      t.data[i] = JSON.parse(JSON.stringify(t.emptyRow));
+    lines.sort((a,b)=>a-b).reverse().forEach((i, ind, arr) => {
+      this.data[i] = JSON.parse(JSON.stringify(this.emptyRow));
     });
     
     return lines;

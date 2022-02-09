@@ -15,6 +15,11 @@ class RS {
      * mino relative to a seemingly-arbitrary "origin" position that
      * makes it easy to program tetromino spawning.
      *
+     * setupFunction is a function that accepts no arguments and can be
+     * used for setting up a rotation system, doing things such as
+     * creating a settings object intended to be adjusted to change the
+     * behavior of the rotation system.
+     * 
      * rotateFunction is a function that determines how tetrominoes
      * should be rotated. It takes two arguments, a direction argument
      * specifying the direction of rotation; 1 if clockwise, -1 or 3 if

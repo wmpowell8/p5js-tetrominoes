@@ -57,93 +57,76 @@ function draw() {
   mgr.draw();
 }
 
-
 class InitialSettingsMenu {
   setup() {
     createCanvas(640, 480);
-    this.settings = {
-      startingLevelM1: 0,
-      /*startingLevelM1Min: 0,
-      startingLevelM1Max: 14,
-      startingLevelM1Step: 1,*/
 
-      das: 170,
-     /* dasMax: 500,
-      dasStep: 10,*/
-
-      arr: 50
-      /*arrMax: 250,
-      arrStep: 10*/
-    };
-    this.menuInd = 3;
+    this.menu = new Menu(
+      new Range("Starting level", 1, 20),
+      new Choice("Goal", [150, 200, Infinity], ["150 Lines", "200 Lines", "Endless"], 0),
+      new Range("DAS", 10, 350, 10, "ms", 170),
+      new Range("ARR",  0, 100, 10, "ms",  50),
+      new Choice("180° Spins", [
+        SRS.settings.one80SpinsEnum.DISABLED,
+        SRS.settings.one80SpinsEnum.NO_KICKS,
+        SRS.settings.one80SpinsEnum.TETRIO,
+        SRS.settings.one80SpinsEnum.NULLPOMINO
+      ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], 0),
+      new Action("Start Game", () => {
+        let settings = {
+          startingLevelM1: this.menu.items[0].value - 1,
+          lineGoal: this.menu.items[1].value,
+          das: this.menu.items[2].value,
+          arr: this.menu.items[3].value
+        };
+        if (settings.startingLevelM1 >= settings.lineGoal / 10) {
+          alert(`A starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+          return;
+        }
+        SRS.settings.one80Spins = this.menu.items[4].value;
+        mgr.showScene(GameStateGame, settings);
+      }, 1)
+    );
   }
 
   draw() {
     background(0);
 
-    textAlign(LEFT, TOP);
-    fill("white");
-    textSize(30);
-
-    let menuInd = this.menuInd;
-
     push();
 
-    [
-      `Starting level: ${this.settings.startingLevelM1 + 1}`,
-      `DAS: ${this.settings.das}ms`,
-      `ARR: ${this.settings.arr}ms`,
-      `Start Game`
-    ].forEach(function(i, iInd, iArr) {
-      if (menuInd == iInd) {
-        fill("yellow");
-        triangle(10, 10 + 30*iInd, 10, 40 + 30*iInd, 10 + sqrt(3)*15, 25 + 30*iInd);
-      } else fill("lightGrey");
-      text(i, 50 + (menuInd==iInd ? (15*((sin(millis()/200))+1)/2) : 0), 10 + 30*iInd);
-    });
+    this.menu.show();
 
     pop();
   }
 
   keyPressed() {
     if (controls.menuUp.includes(keyCode)) {
-      this.menuInd = posMod(this.menuInd - 1, 4);
+      this.menu.up();
     }
     if (controls.menuDown.includes(keyCode)) {
-      this.menuInd = (this.menuInd + 1) % 4;
+      this.menu.down();
     }
     if (controls.menuSelect.includes(keyCode)) {
-      switch (this.menuInd) {
-        case 0: this.settings.startingLevelM1 = prompt("Enter Starting Level") - 1; break;
-        case 1: this.settings.das = min(max(int(prompt("Enter DAS (in milliseconds)")), 10), 350); break;
-        case 2: this.settings.arr = min(max(int(prompt("Enter ARR (in milliseconds)")),  0), 100); break;
-        case 3: mgr.showScene(GameStateGame, this.settings);
-        default: break;
-      }
+      this.menu.select();
     }
     if (controls.menuRight.includes(keyCode)) {
-      switch (this.menuInd) {
-        case 0: this.settings.startingLevelM1 = min(int(this.settings.startingLevelM1 + 1), 14); break;
-        case 1: this.settings.das = min(int((this.settings.das + 10) /10)*10, 350); break;
-        case 2: this.settings.arr = min(int((this.settings.arr + 10) /10)*10, 100); break;
-        default: break;
-      }
+      this.menu.right();
     }
     if (controls.menuLeft.includes(keyCode)) {
-      switch (this.menuInd) {
-        case 0: this.settings.startingLevelM1 = max(int(this.settings.startingLevelM1 - 1), 0); break;
-        case 1: this.settings.das = max(int((this.settings.das - 10) /10)*10, 10); break;
-        case 2: this.settings.arr = max(int((this.settings.arr - 10) /10)*10,  0); break;
-        default: break;
-      }
+      this.menu.left();
     }
   }
 }
 
 class GameStateGame {
+  millisSinceInit() {
+    return millis() - this.initMillis;
+  }
 
   setup() {
     createCanvas(640, 480, WEBGL);
+    
+    this.initMillis = millis();
     
     // Some variables related to inputs
     
@@ -238,14 +221,18 @@ class GameStateGame {
         this.gravityTimer = 0;
         this.lockTimer = this.lockDelay;
         this.movementsUntilLock = movementsPerTetromino;
+        this.lowestY = this.t.y;
         
         return true;
       }
-
+    
+    this.refillQueue();
     },
       function (time, softDrop = false, hardDrop = false, translationDir=0, gravity=50/3, lockDelay = 500, lineClearDelay = 500, das=170, arr=50, are=0, lineAre=0, movementsPerTetromino = 15) {
 
       // Update
+
+      this.gamePaused = false;
         
       this.lockDelay = lockDelay;
       this.movementsPerTetromino = movementsPerTetromino;
@@ -258,6 +245,7 @@ class GameStateGame {
         if (this.areTimer > 0) this.areTimer -= time; else {
           if (this.t == undefined) {
             this.t = this.spawnNew();
+            this.lowestY = this.t.y;
             return;
           }
 
@@ -276,7 +264,10 @@ class GameStateGame {
               this.lockTimer = hardDrop ? -Infinity : this.lockDelay;
               this.score += hardDrop ? 2 : (softDrop ? 1 : 0);
               this.lastMovementWasRotation = 0;
-              this.movementsUntilLock = this.movementsPerTetromino;
+              if (this.t.y > this.lowestY){
+                this.lowestY = this.t.y;
+                this.movementsUntilLock = this.movementsPerTetromino;
+              }
             } else {
               // Something is in the way...
               
@@ -314,9 +305,8 @@ class GameStateGame {
                       // Tetromino not yet qualified for full T-Spin but it will be if there is a mino in both of its front-facing corners.
                       
                       tetrominoCorners = 0;
-                      let game = this;
-                      [{x:0,y:-1},{x:-2,y:-1},{x:-2,y:1},{x:0,y:1}].forEach(function (i, ind, arr) {
-                        if (posMod(ind+game.t.tetromino.facing,4) < 2 && game.m.minoAtPos(game.t.x+i.x, game.t.y+i.y)) tetrominoCorners++;
+                      [{x:0,y:-1},{x:-2,y:-1},{x:-2,y:1},{x:0,y:1}].forEach((i, ind, arr) => {
+                        if (posMod(ind+this.t.tetromino.facing,4) < 2 && this.m.minoAtPos(this.t.x+i.x, this.t.y+i.y)) tetrominoCorners++;
                       });
                       
                       // If the condition is true both front-facing corners are filled so the tetromino is qualified for a full T-Spin!
@@ -379,7 +369,7 @@ class GameStateGame {
                 
                 // Line clear message
                 if (numLines > 0) {
-                  this.scoringMessageQueue.push(new ScoringMessage(numLines>4?numLines+"ln":["","Single","Double","Triple","Quad"][numLines], numLines>4?"blue":["maroon","red","yellow","lime","cyan"][numLines], 18));
+                  this.scoringMessageQueue.push(new ScoringMessage(numLines>4?`${numLines}ln`:["","Single","Double","Triple","Quad"][numLines], numLines>4?"blue":["maroon","red","yellow","lime","cyan"][numLines], 18));
                 // Back-to-Back message
                 if (this.backToBack > 0) this.scoringMessageQueue.push(new ScoringMessage("BACK-TO-BACK", "yellow", 54, 18));}
                 // T-Spin message
@@ -389,13 +379,13 @@ class GameStateGame {
                 if (allClear) this.scoringMessageQueue.push(new ScoringMessage("ALL CLEAR", "yellow", 90, 18));
                 // Combo message
                 if (this.combo > 0) {
-                  this.scoringMessageQueue.forEach(function(iVal, i, iArr) {
+                  this.scoringMessageQueue.forEach((iVal, i, iArr) => {
                     // Used iArr[i] instead of iVal because iVal doesn't update when I splice the array
                     while (iArr[i].text.includes("Combo") && i < iArr.length) {
                       iArr.splice(i, 1);
                     }
                   });
-                  this.scoringMessageQueue.push(new ScoringMessage(this.combo+" Combo", "white", 72, 18));
+                  this.scoringMessageQueue.push(new ScoringMessage(`${this.combo} Combo`, "white", 72, 18));
                 }
                 
                 if (numLines >= 4 || tSpin >= 1) this.backToBack ++; // Last line of the ported scoring code. Manages the rest of Back-to-Back.
@@ -415,6 +405,7 @@ class GameStateGame {
                 this.gravityTimer = 0;
                 this.lockTimer = this.lockDelay;
                 this.movementsUntilLock = this.movementsPerTetromino;
+                //this.lowestY = undefined;
               }
               
               break;
@@ -535,7 +526,7 @@ class GameStateGame {
       
       // Next piece queue
       
-      this.queue.forEach(function (i, ind, arr) {
+      this.queue.forEach((i, ind, arr) => {
         push();
         fill(i.color);
         stroke("white");
@@ -574,7 +565,7 @@ class GameStateGame {
       textSize(15);
       fill("white");
       textAlign(LEFT, BOTTOM);
-      text("Lines: "+this.lineCount+"\nLevel: "+(this.levelM1+1)+"\nScore: "+this.score, gridToScreenX(md.width), gridToScreenY(0));
+      text(`Lines: ${this.lineCount}\nLevel: ${this.levelM1+1}\nScore: ${this.score}`, gridToScreenX(md.width), gridToScreenY(0));
       
       pop();
         
@@ -592,51 +583,54 @@ class GameStateGame {
   }
 
   draw() {
+    g.gamePaused = true;
+
     if (this.gameOver == undefined) {
       try {
-        if (g.lineCount >= 150) throw {name:"You win",message:"Line count has exceeded the length of a standard Marathon mode"};
+        if (this.millisSinceInit()<1000) {
+          // Opening animation
+
+          translate(-(this.millisSinceInit()-1000)/2,(this.millisSinceInit()-1000)/2,(this.millisSinceInit()-1000));
+          rotateY(-(this.millisSinceInit()-1000)/500);
+          pointLight(color("white"), 0, -(this.millisSinceInit()-1000), sqrt(120000));
+        } else {
+          if (g.lineCount >= this.sceneArgs.lineGoal) throw {name:"You win",message:`Line count has reached its goal (${this.sceneArgs.lineGoal} lines)`};
         
-        // Manages soft drop
-        
-        let softDrop = false;
-        
-        for (let i of controls.softDrop) {
-          if (keyIsDown(i)) {
-            softDrop = true;
-            break;
+          // Manages soft drop
+          
+          let softDrop = false;
+          
+          for (let i of controls.softDrop) {
+            if (keyIsDown(i)) {
+              softDrop = true;
+              break;
+            }
           }
-        }
-        
-        // Manages whether tetromino is being translated
-        
-        let translating = false;
-        for (let i of controls.translateRight) {
-          if (keyIsDown(i)) {
-            translating = true;
-            break;
+          
+          // Manages whether tetromino is being translated
+          
+          let translating = false;
+          for (let i of controls.translateRight) {
+            if (keyIsDown(i)) {
+              translating = true;
+              break;
+            }
           }
-        }
-        if (!translating) for (let i of controls.translateLeft) {
-          if (keyIsDown(i)) {
-            translating = true;
-            break;
+          if (!translating) for (let i of controls.translateLeft) {
+            if (keyIsDown(i)) {
+              translating = true;
+              break;
+            }
           }
-        }
-        if (!translating) this.translationDirection = 0;
-        
-        
-        // Updates the game state. May throw an error in case of a game over.
-        // In order, the arguments are time, softDrop, hardDrop, translationDir, gravity, lockDelay, lineClearDelay, das, arr, are, lineAre, movementsPerTetromino (dont ask me why the removed the names)
-        g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, 1000 * (0.8-(g.levelM1*0.007))**g.levelM1, 500, 500, this.sceneArgs.das, this.sceneArgs.arr);
-        // Updates level
-        g.levelM1 = max(g.levelM1, floor(g.lineCount / 10));
-        
-        
-        // Opening animation
-        if (millis()<1000) {
-          translate(-(millis()-1000)/2,(millis()-1000)/2,(millis()-1000));
-          rotateY(-(millis()-1000)/500);
-          pointLight(color("white"), 0, -(millis()-1000), sqrt(120000));
+          if (!translating) this.translationDirection = 0;
+          
+          
+          // Updates the game state. May throw an error in case of a game over.
+          // In order, the arguments are time, softDrop, hardDrop, translationDir, gravity, lockDelay, lineClearDelay, das, arr, are, lineAre, movementsPerTetromino (dont ask me why the removed the names)
+          g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, 1000 * (0.8-(g.levelM1*0.007))**g.levelM1, 500, 500, this.sceneArgs.das, this.sceneArgs.arr);
+          // Updates level
+          g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
+            
         }
       } catch (error) {
         console.error(error.name + ": " + error.message);
@@ -647,6 +641,7 @@ class GameStateGame {
     
     // Shows the board  
     background(56);
+
     push();
     
     if (this.gameOver != undefined) {translate(0, 0, -300 * (1 - Math.exp(-(millis() - this.gameOver.millis)/1000))); rotateY((millis() - this.gameOver.millis)/1000);}
@@ -674,13 +669,16 @@ class GameStateGame {
   }
 
   keyPressed() {
-    if (this.gameOver == undefined && g.t != undefined) {  // Manages other inputs
+    if (this.gameOver == undefined && g.t != undefined && !g.gamePaused) {  // Manages other inputs
       
       if (controls.rotateCW.includes(keyCode)) { // Clockwise rotation
         let result = g.t.rotate(1, (x,y)=>g.m.minoAtPos(x,y));
         if (result.success) {
           g.lockTimer = g.lockDelay;
-          g.movementsUntilLock--;
+          if (g.t.y > g.lowestY){
+            g.lowestY = g.t.y;
+            g.movementsUntilLock = g.movementsPerTetromino;
+          } else g.movementsUntilLock--;
           g.lastMovementWasRotation = abs(result.x)+abs(result.y) >= 3 ? 2 : 1;
         }
       }
@@ -688,7 +686,10 @@ class GameStateGame {
         let result = g.t.rotate(-1, (x,y)=>g.m.minoAtPos(x,y));
         if (result.success) {
           g.lockTimer = g.lockDelay;
-          g.movementsUntilLock--;
+          if (g.t.y > g.lowestY){
+            g.lowestY = g.t.y;
+            g.movementsUntilLock = g.movementsPerTetromino;
+          } else g.movementsUntilLock--;
           g.lastMovementWasRotation = abs(result.x)+abs(result.y) >= 3 ? 2 : 1;
         }
       }
@@ -696,7 +697,10 @@ class GameStateGame {
         let result = g.t.rotate(2, (x,y)=>g.m.minoAtPos(x,y));
         if (result.success) {
           g.lockTimer = g.lockDelay;
-          g.movementsUntilLock--;
+          if (g.t.y > g.lowestY){
+            g.lowestY = g.t.y;
+            g.movementsUntilLock = g.movementsPerTetromino;
+          } else g.movementsUntilLock--;
           g.lastMovementWasRotation = abs(result.x)+abs(result.y) >= 3 ? 2 : 1;
         }
       }
