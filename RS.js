@@ -22,15 +22,32 @@ class RS {
      * enabled). The other argument is a function returning a boolean
      * value representing whether or not there is a mino at a given
      * position relative to the "origin" or this position is outside the
-     * walls or below the floor of the playfield. It returns _________
+     * walls or below the floor of the playfield. This position is
+     * signified by two arguments: an X and Y position. It returns an
+     * object with an x key and a y key, signifying how the tetromino
+     * should kick when rotating, a boolean success key, signifying
+     * whether the rotation was a success or a failure (this does not
+     * affect outcome, only what sound to play, etc), and a tetromino
+     * key with a reference to the Tetromino object.
      */
     this.tetrominoes = tetrominoData;
     this.rotate = rotateFunction;
   }
-  bag() {
+  bag(num=1) {
+    /* Function that returns a list of all the Tetromino objects that
+     * make up a rotation system. Useful for the 7-bag tetromino
+     * generation system.
+     *
+     * It takes one optional argument, num, which defaults to 1. It
+     * determines how many multiples of each tetromino you want in your
+     * bag, so if you, for example, wanted a 14-bag instead of a 7-bag
+     * you would set this argument to 2 instead of 1.
+     */
     let bag = [];
-    for (let i of this.tetrominoes) {
-      bag.push(new Tetromino(i, this.rotate));
+    for (let n=0; n<num; n++) {
+      for (let i of this.tetrominoes) {
+        bag.push(new Tetromino(JSON.parse(JSON.stringify(i)), this.rotate));
+      }
     }
     return bag;
   }
