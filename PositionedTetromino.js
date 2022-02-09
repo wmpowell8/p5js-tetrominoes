@@ -1,5 +1,5 @@
 class PositionedTetromino {
-  constructor(tetromino, x=-20, y=5) {
+  constructor(tetromino, x=5, y=-19) {
     
     // tetromino attributes include: color, 0, 1, 2, 3, rotate, facing
     this.tetromino = tetromino;
@@ -30,12 +30,25 @@ class PositionedTetromino {
      *   tetromino: (this PositionedTetromino object)
      * }
      */
-    
-    let result = this.tetromino.rotate(dir, (x,y)=>minoAtPos(x-this.x,y-this.y));
-    x += result.x;
-    y += result.y;
+
+    let result = this.tetromino.rotate(dir, (x,y)=>minoAtPos(x+this.x,y+this.y));
+    this.x += result.x;
+    this.y += result.y;
     
     // Return value subject to change as detailed above.
     return result.success;
+  }
+  
+  translate(x, y, minoAtPos) {
+    // Return value subject to change as in rotate function
+    
+    for (let i of this.getCurrentShape()) {
+      if (minoAtPos(i.x + x, i.y + y)) {
+        return false;
+      }
+    }
+    this.x += x;
+    this.y += y;
+    return true;
   }
 }
