@@ -73,29 +73,21 @@ const SRS = new RS([
         [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x:-2,y: 1},{x: 1,y:-2}]  // 3>>2
       ]
     ],
-    /*
-I Tetromino Wall Kick Data (Arika)
-In case you wanted to copy and paste these numbers in
-for the kicks from TGM3 or TETR.IO
-
-CW rotations (2nd list item, above)
-
-    [ // Arika SRS
-      [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x: 1,y: 2},{x:-2,y:-1}]  //0>>1
-      [{x:0,y:0},{x:-1,y: 0},{x: 2,y: 0},{x:-1,y: 2},{x: 2,y:-1}]  //1>>2
-      [{x:0,y:0},{x: 2,y: 0},{x:-1,y: 0},{x: 2,y: 1},{x:-1,y:-1}]  //2>>3
-      [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x:-2,y: 1},{x: 1,y:-2}]  //3>>0
-    ],
-
-CCW rotations (Last list item, above)
-
-    [ // Arika SRS
-      [{x:0,y:0},{x: 2,y: 0},{x:-1,y: 0},{x:-1,y: 2},{x: 2,y:-1}]  //0>>3
-      [{x:0,y:0},{x: 2,y: 0},{x:-1,y: 0},{x: 2,y: 1},{x:-1,y:-2}]  //1>>0
-      [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x:-2,y: 1},{x: 1,y:-1}]  //2>>1
-      [{x:0,y:0},{x: 1,y: 0},{x:-2,y: 0},{x: 1,y: 2},{x:-2,y:-1}]  //3>>2
-    ]
-    */
+    arikaWallkickOverride: {
+      // Wallkick override in the case that Arika SRS is enabled by setting SRS.settings.iKicks to SRS.settings.iKicksEnum.ARIKA
+      1: [
+        [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x: 1,y: 2},{x:-2,y:-1}],  //0>>1
+        [{x:0,y:0},{x:-1,y: 0},{x: 2,y: 0},{x:-1,y: 2},{x: 2,y:-1}],  //1>>2
+        [{x:0,y:0},{x: 2,y: 0},{x:-1,y: 0},{x: 2,y: 1},{x:-1,y:-1}],  //2>>3
+        [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x:-2,y: 1},{x: 1,y:-2}]  //3>>0
+      ],
+      3: [
+        [{x:0,y:0},{x: 2,y: 0},{x:-1,y: 0},{x:-1,y: 2},{x: 2,y:-1}],  //0>>3
+        [{x:0,y:0},{x: 2,y: 0},{x:-1,y: 0},{x: 2,y: 1},{x:-1,y:-2}],  //1>>0
+        [{x:0,y:0},{x:-2,y: 0},{x: 1,y: 0},{x:-2,y: 1},{x: 1,y:-1}],  //2>>1
+        [{x:0,y:0},{x: 1,y: 0},{x:-2,y: 0},{x: 1,y: 2},{x:-2,y:-1}]  //3>>2
+      ]
+    },
     isT: false
   },
   /*J*/{
@@ -181,6 +173,10 @@ CCW rotations (Last list item, above)
         break;
       default: break;
     }
+
+    if (SRS.settings.iKicks == SRS.settings.iKicksEnum.ARIKA) {
+      if (this.arikaWallkickOverride != undefined) Object.assign(wallkicks, this.arikaWallkickOverride);
+    }
   }
 
   let dir = posMod(d,4);
@@ -216,7 +212,12 @@ SRS.settings = {
     TETRIO: 2,
     NULLPOMINO: 3
   },
-  one80Spins: 0
+  one80Spins: 0,
+  iKicksEnum: {
+    STANDARD: 0,
+    ARIKA: 1
+  },
+  iKicks: 0
 };
 
 // TODO: find a way to implement 180 spins that doesn't rely on Nullpomino's kicks being stored with the tetromino data

@@ -71,7 +71,8 @@ class InitialSettingsMenu {
         SRS.settings.one80SpinsEnum.NO_KICKS,
         SRS.settings.one80SpinsEnum.TETRIO,
         SRS.settings.one80SpinsEnum.NULLPOMINO
-      ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], 0),
+      ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
+      new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
       new Action("Start Game", () => {
         let settings = {
           startingLevelM1: this.menu.items[0].value - 1,
@@ -80,10 +81,11 @@ class InitialSettingsMenu {
           arr: this.menu.items[3].value
         };
         if (settings.startingLevelM1 >= settings.lineGoal / 10) {
-          alert(`A starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+          alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
           return;
         }
         SRS.settings.one80Spins = this.menu.items[4].value;
+        SRS.settings.iKicks = this.menu.items[5].value;
         mgr.showScene(GameStateGame, settings);
       }, 1)
     );
