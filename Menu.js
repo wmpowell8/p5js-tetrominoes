@@ -24,7 +24,7 @@ class Menu {
 
     for (let i of ["select", "right", "left"]) {
       this[i] = function() {
-        this.items[this.selectedIndex][i]();
+        this.items[this.selectedIndex][i].call(this);
       }
     }
   }
@@ -92,35 +92,37 @@ class Action extends MenuItem {
   }
 }
 
-class Range extends MenuItem {
+class MenuRange extends MenuItem {
   constructor(propertyName, min = 1, max = Infinity, step = 1, suffix = "", defaultValue = min, selectionPriority = 0) {
+    // When x is a Number, p5.int(x) is x | 0
+
     super(
-      function (isSelected) {
+      (isSelected) => {
         MenuItem.showText(isSelected, `${propertyName}: ${this.value}${suffix}`);
         stroke(isSelected ? "yellow" : "lightGrey");
         strokeWeight(1);
         line(40, 32, 140, 32);
         strokeWeight(5);
         line(40, 32, 40 + (this.value - min)/(max - min) * 100, 32);
-      }, function () {
+      }, () => {
         let reply = prompt(`Enter ${propertyName}${suffix == "" ? "" : " (in "+suffix+")"}`);
         if ([null, ""].includes(reply) || isNaN(reply)) return false;
-        this.value = Math.min(Math.max(int(reply / step) * step, min), max);
+        this.value = Math.min(Math.max(((reply / step) | 0) * step, min), max);
         return true;
-      }, function () {
-        this.value = Math.min(int((this.value + step) / step)* step, max);
-      }, function () {
-        this.value = Math.max(int((this.value - step) / step)* step, min);
+      }, () => {
+        this.value = Math.min((((this.value + step) / step) | 0)* step, max);
+      }, () => {
+        this.value = Math.max((((this.value - step) / step) | 0)* step, min);
       },
     selectionPriority);
-    this.value = Math.min(Math.max(int(defaultValue / step) * step, min), max);
+    this.value = Math.min(Math.max(((defaultValue / step) | 0) * step, min), max);
   }
 }
 
 class Choice extends MenuItem {
   constructor(propertyName, values, keys = values, defaultIndex = 0, selectionPriority = 0) {
     super(
-      function(isSelected) {
+      (isSelected) => {
         MenuItem.showText(isSelected, `${propertyName}: ${(keys[this.index] == undefined) ? this.value : keys[this.index]}`);
         stroke(isSelected ? "yellow" : "lightGrey");
         values.forEach((i, iInd, iArr) => {
@@ -129,10 +131,10 @@ class Choice extends MenuItem {
         });
       },
       function () {},
-      function() {
+      () => {
         this.index = (this.index + 1) % values.length;
       },
-      function() {
+      () => {
         this.index = posMod((this.index - 1), values.length);
       },
       selectionPriority = selectionPriority

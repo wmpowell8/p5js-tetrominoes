@@ -16,9 +16,6 @@
 // Why is clearing 4 lines at once using the I-tetromino called a "Quad" and not a "T****s" like it's supposed to? A lot of fangames/clones don't call it a T****s; I can only assume it's because of copyright infringement.
 // How are you able to obtain the information on how modern T****s works? This info is freely avalible on various wikis and I know a lot of it by heart. It is avalible partially because of reverse-engineering and partially because of... dare I say it... leaked documents from the T****s Company.
 
-// A function like modulus, but that always returns a positive result.
-posMod = (divisor, dividend) => ((divisor % dividend) + dividend) % dividend; // a trick for ensuring the result is always positive
-
 // An Object with the game's controls.
 const controls = {
   translateRight: [39/*right*/],
@@ -38,6 +35,12 @@ const controls = {
   menuBack:   [27/*esc*/]
 };
 
+// A function like modulus, but that always returns a positive result.
+posMod = (divisor, dividend) => ((divisor % dividend) + dividend) % dividend; // a trick for ensuring the result is always positive
+
+// Helper function for formatting times
+formatTime = (time) => str(int(time/600000)) + int(time/60000 % 10) + ":" + int(time/10000 % 6) + int(time/1000 % 10) + "." + int(time/100 % 10) + int(time/10 % 10) + int(time % 10);
+
 var regularFont;
 var g;
 
@@ -51,74 +54,116 @@ function preload() {
 function setup() {
   mgr = new SceneManager();
   mgr.wire();
-  mgr.showScene(InitialSettingsMenu);
+  mgr.showScene(ModeSelectionMenu);
 }
 function draw() {
   mgr.draw();
 }
 
-class InitialSettingsMenu {
-  setup() {
-    createCanvas(640, 480);
+// Helper function for creating scenes that display menus
 
-    this.menu = new Menu(
-      new Range("Starting level", 1, 20),
-      new Choice("Goal", [150, 200, Infinity], ["150 Lines", "200 Lines", "Endless"], 0),
-      new Range("DAS", 10, 350, 10, "ms", 170),
-      new Range("ARR",  0, 100, 10, "ms",  50),
-      new Choice("180° Spins", [
-        SRS.settings.one80SpinsEnum.DISABLED,
-        SRS.settings.one80SpinsEnum.NO_KICKS,
-        SRS.settings.one80SpinsEnum.TETRIO,
-        SRS.settings.one80SpinsEnum.NULLPOMINO
-      ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
-      new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
-      new Action("Start Game", () => {
-        let settings = {
-          startingLevelM1: this.menu.items[0].value - 1,
-          lineGoal: this.menu.items[1].value,
-          das: this.menu.items[2].value,
-          arr: this.menu.items[3].value
-        };
-        if (settings.startingLevelM1 >= settings.lineGoal / 10) {
-          alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
-          return;
-        }
-        SRS.settings.one80Spins = this.menu.items[4].value;
-        SRS.settings.iKicks = this.menu.items[5].value;
-        mgr.showScene(GameStateGame, settings);
-      }, 1)
-    );
-  }
-
-  draw() {
-    background(0);
-
-    push();
-
-    this.menu.show();
-
-    pop();
-  }
-
-  keyPressed() {
-    if (controls.menuUp.includes(keyCode)) {
-      this.menu.up();
+function MenuScene(menu) {
+  return class {
+    setup() {
+      createCanvas(640, 480);  
+      this.menu = menu;
     }
-    if (controls.menuDown.includes(keyCode)) {
-      this.menu.down();
+  
+    draw() {
+      background(0);
+  
+      push();
+  
+      this.menu.show();
+  
+      pop();
     }
-    if (controls.menuSelect.includes(keyCode)) {
-      this.menu.select();
+  
+    keyPressed() {
+      if (controls.menuUp.includes(keyCode)) {
+        this.menu.up();
+      }
+      if (controls.menuDown.includes(keyCode)) {
+        this.menu.down();
+      }
+      if (controls.menuSelect.includes(keyCode)) {
+        this.menu.select();
+      }
+      if (controls.menuRight.includes(keyCode)) {
+        this.menu.right();
+      }
+      if (controls.menuLeft.includes(keyCode)) {
+        this.menu.left();
+      }
     }
-    if (controls.menuRight.includes(keyCode)) {
-      this.menu.right();
-    }
-    if (controls.menuLeft.includes(keyCode)) {
-      this.menu.left();
-    }
-  }
+  };
 }
+
+ModeSelectionMenu = MenuScene(new Menu(
+  new Action("Classic", function () {mgr.showScene(ClassicMenu)}),
+  new Action("Line Race", function () {mgr.showScene(LineRaceMenu)})
+));
+
+ClassicMenu = MenuScene(new Menu(
+  new MenuRange("Starting level", 1, 20),
+  new Choice("Goal", [150, 200, Infinity], ["150 Lines", "200 Lines", "Endless"], 0),
+  new MenuRange("DAS", 10, 350, 10, "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "ms",  50),
+  new Choice("180° Spins", [
+    SRS.settings.one80SpinsEnum.DISABLED,
+    SRS.settings.one80SpinsEnum.NO_KICKS,
+    SRS.settings.one80SpinsEnum.TETRIO,
+    SRS.settings.one80SpinsEnum.NULLPOMINO
+  ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
+  new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
+  new Action("Start Game", function () {
+    let settings = {
+      startingLevelM1: this.items[0].value - 1,
+      lineGoal: this.items[1].value,
+      das: this.items[2].value,
+      arr: this.items[3].value,
+      updateLevel: true
+    };
+    if (settings.startingLevelM1 >= settings.lineGoal / 10) {
+      alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+      return;
+    }
+    SRS.settings.one80Spins = this.items[4].value;
+    SRS.settings.iKicks = this.items[5].value;
+    mgr.showScene(GameStateGame, settings);
+  }, 1)
+));
+  
+let goalOptions = [10, 20, 40, 100, 200, 400, 1000];
+LineRaceMenu = MenuScene(new Menu(
+  new Choice("Goal", goalOptions, goalOptions.map((i) => i + " Lines"), 2),
+  new MenuRange("DAS", 10, 350, 10, "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "ms",  50),
+  new MenuRange("Line clear delay", 0, 500, 10, "ms", 500),
+  new Choice("180° Spins", [
+    SRS.settings.one80SpinsEnum.DISABLED,
+    SRS.settings.one80SpinsEnum.NO_KICKS,
+    SRS.settings.one80SpinsEnum.TETRIO,
+    SRS.settings.one80SpinsEnum.NULLPOMINO
+  ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
+  new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
+  new Action("Start Game", function () {
+    let settings = {
+      startingLevelM1: 0,
+      lineGoal: this.items[0].value,
+      das: this.items[1].value,
+      arr: this.items[2].value,
+      lineClearDelay: this.items[3].value
+    };
+    if (settings.startingLevelM1 >= settings.lineGoal / 10) {
+      alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+      return;
+    }
+    SRS.settings.one80Spins = this.items[4].value;
+    SRS.settings.iKicks = this.items[5].value;
+    mgr.showScene(GameStateGame, settings);
+  }, 1)
+));
 
 class GameStateGame {
   millisSinceInit() {
@@ -169,6 +214,8 @@ class GameStateGame {
       this.movementsUntilLock = this.movementsPerTetromino;
       this.lastMovementWasRotation = 0;
       this.backToBack = 0;
+      this.time = 0;
+      this.timeExclDelays = 0;
       
       this.scoringMessageQueue = [];
       
@@ -235,6 +282,7 @@ class GameStateGame {
       // Update
 
       this.gamePaused = false;
+      this.time += time;
         
       this.lockDelay = lockDelay;
       this.movementsPerTetromino = movementsPerTetromino;
@@ -245,6 +293,8 @@ class GameStateGame {
         this.linesToClear = [];
 
         if (this.areTimer > 0) this.areTimer -= time; else {
+          this.timeExclDelays += time;
+
           if (this.t == undefined) {
             this.t = this.spawnNew();
             this.lowestY = this.t.y;
@@ -556,8 +606,7 @@ class GameStateGame {
         }
         pop();
       }
-      
-      
+            
       // HUD text (Score/Lines/Level)
       
       push();
@@ -567,7 +616,7 @@ class GameStateGame {
       textSize(15);
       fill("white");
       textAlign(LEFT, BOTTOM);
-      text(`Lines: ${this.lineCount}\nLevel: ${this.levelM1+1}\nScore: ${this.score}`, gridToScreenX(md.width), gridToScreenY(0));
+      text(`Time: ${formatTime(this.time)}\nExcl. Delays: ${formatTime(this.timeExclDelays)}\nLines: ${this.lineCount}\nLevel: ${this.levelM1+1}\nScore: ${this.score}`, gridToScreenX(md.width), gridToScreenY(0));
       
       pop();
         
@@ -596,7 +645,7 @@ class GameStateGame {
           rotateY(-(this.millisSinceInit()-1000)/500);
           pointLight(color("white"), 0, -(this.millisSinceInit()-1000), sqrt(120000));
         } else {
-          if (g.lineCount >= this.sceneArgs.lineGoal) throw {name:"You win",message:`Line count has reached its goal (${this.sceneArgs.lineGoal} lines)`};
+          if (g.lineCount >= this.sceneArgs.lineGoal && g.linesToClear.length <= 0) throw {name:"You win",message:`Line count has reached its goal (${this.sceneArgs.lineGoal} lines)`};
         
           // Manages soft drop
           
@@ -629,9 +678,9 @@ class GameStateGame {
           
           // Updates the game state. May throw an error in case of a game over.
           // In order, the arguments are time, softDrop, hardDrop, translationDir, gravity, lockDelay, lineClearDelay, das, arr, are, lineAre, movementsPerTetromino (dont ask me why the removed the names)
-          g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, 1000 * (0.8-(g.levelM1*0.007))**g.levelM1, 500, 500, this.sceneArgs.das, this.sceneArgs.arr);
+          g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, 1000 * (0.8-(g.levelM1*0.007))**g.levelM1, 500, this.sceneArgs.lineClearDelay ?? 500, this.sceneArgs.das, this.sceneArgs.arr);
           // Updates level
-          g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
+          if (this.sceneArgs.showLevel) g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
             
         }
       } catch (error) {
@@ -664,7 +713,7 @@ class GameStateGame {
       textSize(20);
       text(this.gameOver.message, 0, -50);
 
-      text(`Score: ${g.score}\nLines: ${g.lineCount} (Level ${g.levelM1 + 1})`, 0, 25);
+      text(`Time: ${formatTime(g.time)} (${formatTime(g.timeExclDelays)} excl. delays)\nScore: ${g.score}\nLines: ${g.lineCount} (Level ${g.levelM1 + 1})`, 0, 25);
 
       pop();
     }
