@@ -28,11 +28,11 @@ const controls = {
   hold:           [16/*shift*/, 67/*c*/],
 
   menuSelect: [13/*enter*/],
-  menuDown:   [40/*down*/],
-  menuUp:     [38/*up*/],
-  menuLeft:   [37/*left*/],
-  menuRight:  [39/*right*/],
-  menuBack:   [27/*esc*/]
+  menuDown:   [40/*down*/, 83/*s*/],
+  menuUp:     [38/*up*/, 87/*w*/],
+  menuLeft:   [37/*left*/, 65/*a*/],
+  menuRight:  [39/*right*/, 68/*d*/],
+  menuBack:   [27/*esc*/, 8/*backspace*/, 46/*delete*/]
 };
 
 // A function like modulus, but that always returns a positive result.
