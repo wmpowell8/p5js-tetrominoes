@@ -122,7 +122,8 @@ ClassicMenu = MenuScene(new Menu(
       lineGoal: this.items[1].value,
       das: this.items[2].value,
       arr: this.items[3].value,
-      updateLevel: true
+      updateLevel: true,
+      generateHUDText: (game) => `Lines: ${game.lineCount}\nLevel: ${game.levelM1+1}\nScore: ${game.score}`
     };
     if (settings.startingLevelM1 >= settings.lineGoal / 10) {
       alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
@@ -153,7 +154,8 @@ LineRaceMenu = MenuScene(new Menu(
       lineGoal: this.items[0].value,
       das: this.items[1].value,
       arr: this.items[2].value,
-      lineClearDelay: this.items[3].value
+      lineClearDelay: this.items[3].value,
+      generateHUDText: (game) => `Time: ${formatTime(game.time)}\nExcl. Delays: ${formatTime(game.timeExclDelays)}\nLines: ${game.lineCount}`
     };
     if (settings.startingLevelM1 >= settings.lineGoal / 10) {
       alert(`
@@ -494,8 +496,8 @@ class GameStateGame {
       }
       
       
-      },
-      function () {
+    },
+    function (generateHUDTextCallback) {
       // Show
       
       let md = this.m.getDimensions(); // matrix dimensions
@@ -620,7 +622,7 @@ class GameStateGame {
       textSize(15);
       fill("white");
       textAlign(LEFT, BOTTOM);
-      text(`Time: ${formatTime(this.time)}\nExcl. Delays: ${formatTime(this.timeExclDelays)}\nLines: ${this.lineCount}\nLevel: ${this.levelM1+1}\nScore: ${this.score}`, gridToScreenX(md.width), gridToScreenY(0));
+      text(generateHUDTextCallback(this), gridToScreenX(md.width), gridToScreenY(0));
       
       pop();
         
@@ -704,7 +706,7 @@ class GameStateGame {
     
     if (this.gameOver != undefined) {translate(0, 0, -300 * (1 - Math.exp(-(millis() - this.gameOver.millis)/1000))); rotateY((millis() - this.gameOver.millis)/1000);}
 
-    g.show();
+    g.show(this.sceneArgs.generateHUDText);
 
     pop();
     
