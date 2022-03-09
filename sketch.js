@@ -156,7 +156,11 @@ LineRaceMenu = MenuScene(new Menu(
       lineClearDelay: this.items[3].value
     };
     if (settings.startingLevelM1 >= settings.lineGoal / 10) {
-      alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+      alert(`
+        Error: Invalid Starting Level\n
+        A starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines.
+        You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.
+      `);
       return;
     }
     SRS.settings.one80Spins = this.items[4].value;
@@ -645,7 +649,7 @@ class GameStateGame {
           rotateY(-(this.millisSinceInit()-1000)/500);
           pointLight(color("white"), 0, -(this.millisSinceInit()-1000), sqrt(120000));
         } else {
-          if (g.lineCount >= this.sceneArgs.lineGoal && g.linesToClear.length <= 0) throw {name:"You win",message:`Line count has reached its goal (${this.sceneArgs.lineGoal} lines)`};
+          if (g.lineCount >= this.sceneArgs.lineGoal && g.linesToClear.length <= 0) throw new GameOverCondition("You win", `Line count has reached its goal (${this.sceneArgs.lineGoal} lines)`);
         
           // Manages soft drop
           
@@ -681,12 +685,15 @@ class GameStateGame {
           g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, 1000 * (0.8-(g.levelM1*0.007))**g.levelM1, 500, this.sceneArgs.lineClearDelay ?? 500, this.sceneArgs.das, this.sceneArgs.arr);
           // Updates level
           if (this.sceneArgs.showLevel) g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
-            
+          
         }
       } catch (error) {
-        console.error(error.name + ": " + error.message);
-        console.trace(error);
-        this.gameOver = Object.assign(error, {millis: millis()});
+        if (error instanceof GameOverCondition) {
+          this.gameOver = Object.assign(error, {millis: millis()});
+        } else {
+          setTimeout(function(){alert(`A(n) "${error.name}" exception occurred while updating the game state. Check the debug console for details.`)},0);
+          throw error;
+        }
       }
     }
     
