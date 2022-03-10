@@ -101,6 +101,7 @@ function MenuScene(menu) {
 
 ModeSelectionMenu = MenuScene(new Menu(
   new Action("Classic", function () {mgr.showScene(ClassicMenu)}),
+  new Action("Extreme", function () {mgr.showScene(ExtremeMenu)}),
   new Action("Line Race", function () {mgr.showScene(LineRaceMenu)})
 ));
 
@@ -122,7 +123,6 @@ ClassicMenu = MenuScene(new Menu(
       lineGoal: this.items[1].value,
       das: this.items[2].value,
       arr: this.items[3].value,
-      updateLevel: true,
       generateHUDText: (game) => `Lines: ${game.lineCount}\nLevel: ${game.levelM1+1}\nScore: ${game.score}`
     };
     if (settings.startingLevelM1 >= settings.lineGoal / 10) {
@@ -134,7 +134,39 @@ ClassicMenu = MenuScene(new Menu(
     mgr.showScene(GameStateGame, settings);
   }, 1)
 ));
-  
+
+ExtremeMenu = MenuScene(new Menu(
+  new MenuRange("Starting level", 1, 30, 1, "M"),
+  new MenuRange("DAS", 10, 350, 10, "", "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "", "ms",  50),
+  new Choice("180° Spins", [
+    SRS.settings.one80SpinsEnum.DISABLED,
+    SRS.settings.one80SpinsEnum.NO_KICKS,
+    SRS.settings.one80SpinsEnum.TETRIO,
+    SRS.settings.one80SpinsEnum.NULLPOMINO
+  ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
+  new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
+  new Action("Start Game", function () {
+    let settings = {
+      startingLevelM1: this.items[0].value - 1,
+      updateLevel: (lv,lc) => min(max(lv, floor(lc / 10)), 29),
+      lineGoal: 300,
+      das: this.items[1].value,
+      arr: this.items[2].value,
+      gravity: (l) => 0,
+      lockDelay: (l) => (31 - l) / 30 * (500 - settings.arr) + settings.arr,
+      generateHUDText: (game) => `Lines: ${game.lineCount}\nLevel: M${game.levelM1+1}\nScore: ${game.score}`
+    };
+    if (settings.startingLevelM1 >= settings.lineGoal / 10) {
+      alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+      return;
+    }
+    SRS.settings.one80Spins = this.items[3].value;
+    SRS.settings.iKicks = this.items[4].value;
+    mgr.showScene(GameStateGame, settings);
+  }, 1)
+));
+
 let goalOptions = [10, 20, 40, 100, 200, 400, 1000];
 LineRaceMenu = MenuScene(new Menu(
   new Choice("Goal", goalOptions, goalOptions.map((i) => i + " Lines"), 2),
@@ -151,7 +183,7 @@ LineRaceMenu = MenuScene(new Menu(
   new Action("Start Game", function () {
     let settings = {
       startingLevelM1: 0,
-      updateLevel: false,
+      updateLevel: (lv,lc)=>lv,
       lineGoal: this.items[0].value,
       das: this.items[1].value,
       arr: this.items[2].value,
@@ -690,7 +722,7 @@ class GameStateGame {
           // In order, the arguments are time, softDrop, hardDrop, translationDir, gravity, lockDelay, lineClearDelay, das, arr, are, lineAre, movementsPerTetromino (dont ask me why the removed the names)
           g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, this.sceneArgs.gravity(g.levelM1), this.sceneArgs.lockDelay(g.levelM1), this.sceneArgs.lineClearDelay(g.levelM1), this.sceneArgs.das, this.sceneArgs.arr);
           // Updates level
-          if (this.sceneArgs.updateLevel ?? true) g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
+          g.levelM1 = (this.sceneArgs.updateLevel ?? ((lv,lc) => min(max(lv, floor(lc / 10)), 19)))(g.levelM1, g.lineCount);
           
         }
       } catch (error) {

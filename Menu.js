@@ -106,7 +106,7 @@ class MenuRange extends MenuItem {
         strokeWeight(5);
         line(40, 32, 40 + (this.value - min)/(max - min) * 100, 32);
       }, () => {
-        let reply = prompt(`Enter ${propertyName}${suffix == "" ? "" : " (in "+suffix+")"}`);
+        let reply = prompt(`Enter ${propertyName}${suffix == "" ? "" : ` (in ${suffix})`}${prefix == "" ? "" : ` (excl. "${prefix}" at beginning)`}`);
         if ([null, ""].includes(reply) || isNaN(reply)) return false;
         this.value = Math.min(Math.max(((reply / step) | 0) * step, min), max);
         return true;
