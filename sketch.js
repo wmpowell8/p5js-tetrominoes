@@ -151,6 +151,7 @@ LineRaceMenu = MenuScene(new Menu(
   new Action("Start Game", function () {
     let settings = {
       startingLevelM1: 0,
+      updateLevel: false,
       lineGoal: this.items[0].value,
       das: this.items[1].value,
       arr: this.items[2].value,
@@ -689,7 +690,7 @@ class GameStateGame {
           // In order, the arguments are time, softDrop, hardDrop, translationDir, gravity, lockDelay, lineClearDelay, das, arr, are, lineAre, movementsPerTetromino (dont ask me why the removed the names)
           g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, this.sceneArgs.gravity(g.levelM1), this.sceneArgs.lockDelay(g.levelM1), this.sceneArgs.lineClearDelay(g.levelM1), this.sceneArgs.das, this.sceneArgs.arr);
           // Updates level
-          if (this.sceneArgs.showLevel) g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
+          if (this.sceneArgs.updateLevel ?? true) g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
           
         }
       } catch (error) {
