@@ -16,6 +16,7 @@ class Menu {
     this.items.forEach((i, iInd, iArr) => {
       if (i.selectionPriority > maxSelectionPriority) {
         this.selectedIndex = iInd;
+        maxSelectionPriority = iInd;
       }
     });
 
