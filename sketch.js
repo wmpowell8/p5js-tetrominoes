@@ -107,8 +107,8 @@ ModeSelectionMenu = MenuScene(new Menu(
 ClassicMenu = MenuScene(new Menu(
   new MenuRange("Starting level", 1, 20),
   new Choice("Goal", [150, 200, Infinity], ["150 Lines", "200 Lines", "Endless"], 0),
-  new MenuRange("DAS", 10, 350, 10, "ms", 170),
-  new MenuRange("ARR",  0, 100, 10, "ms",  50),
+  new MenuRange("DAS", 10, 350, 10, "", "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "", "ms",  50),
   new Choice("180° Spins", [
     SRS.settings.one80SpinsEnum.DISABLED,
     SRS.settings.one80SpinsEnum.NO_KICKS,
@@ -138,9 +138,9 @@ ClassicMenu = MenuScene(new Menu(
 let goalOptions = [10, 20, 40, 100, 200, 400, 1000];
 LineRaceMenu = MenuScene(new Menu(
   new Choice("Goal", goalOptions, goalOptions.map((i) => i + " Lines"), 2),
-  new MenuRange("DAS", 10, 350, 10, "ms", 170),
-  new MenuRange("ARR",  0, 100, 10, "ms",  50),
-  new MenuRange("Line clear delay", 0, 500, 10, "ms", 500),
+  new MenuRange("DAS", 10, 350, 10, "", "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "", "ms",  50),
+  new MenuRange("Line clear delay", 0, 500, 10, "", "ms", 500),
   new Choice("180° Spins", [
     SRS.settings.one80SpinsEnum.DISABLED,
     SRS.settings.one80SpinsEnum.NO_KICKS,

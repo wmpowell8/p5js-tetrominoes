@@ -94,12 +94,12 @@ class Action extends MenuItem {
 }
 
 class MenuRange extends MenuItem {
-  constructor(propertyName, min = 1, max = Infinity, step = 1, suffix = "", defaultValue = min, selectionPriority = 0) {
+  constructor(propertyName, min = 1, max = Infinity, step = 1, prefix="", suffix = "", defaultValue = min, selectionPriority = 0) {
     // When x is a Number, p5.int(x) is x | 0
 
     super(
       (isSelected) => {
-        MenuItem.showText(isSelected, `${propertyName}: ${this.value}${suffix}`);
+        MenuItem.showText(isSelected, `${propertyName}: ${prefix}${this.value}${suffix}`);
         stroke(isSelected ? "yellow" : "lightGrey");
         strokeWeight(1);
         line(40, 32, 140, 32);
