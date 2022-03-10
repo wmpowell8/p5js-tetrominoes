@@ -154,7 +154,7 @@ LineRaceMenu = MenuScene(new Menu(
       lineGoal: this.items[0].value,
       das: this.items[1].value,
       arr: this.items[2].value,
-      lineClearDelay: this.items[3].value,
+      lineClearDelay: (l) => this.items[3].value,
       generateHUDText: (game) => `Time: ${formatTime(game.time)}\nExcl. Delays: ${formatTime(game.timeExclDelays)}\nLines: ${game.lineCount}`
     };
     if (settings.startingLevelM1 >= settings.lineGoal / 10) {
@@ -637,6 +637,9 @@ class GameStateGame {
     // Initializes the game
     g.init();
     g.levelM1 = this.sceneArgs.startingLevelM1;
+    this.sceneArgs.gravity ??= (l) => 1000 * (0.8-(l*0.007))**l;
+    this.sceneArgs.lockDelay ??= (l) => 500;
+    this.sceneArgs.lineClearDelay ??= (l) => 500;
   }
 
   draw() {
@@ -684,7 +687,7 @@ class GameStateGame {
           
           // Updates the game state. May throw an error in case of a game over.
           // In order, the arguments are time, softDrop, hardDrop, translationDir, gravity, lockDelay, lineClearDelay, das, arr, are, lineAre, movementsPerTetromino (dont ask me why the removed the names)
-          g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, 1000 * (0.8-(g.levelM1*0.007))**g.levelM1, 500, this.sceneArgs.lineClearDelay ?? 500, this.sceneArgs.das, this.sceneArgs.arr);
+          g.update(deltaTime, softDrop, this.hardDropThisFrame, this.translationDirection, this.sceneArgs.gravity(g.levelM1), this.sceneArgs.lockDelay(g.levelM1), this.sceneArgs.lineClearDelay(g.levelM1), this.sceneArgs.das, this.sceneArgs.arr);
           // Updates level
           if (this.sceneArgs.showLevel) g.levelM1 = min(max(g.levelM1, floor(g.lineCount / 10)), 19);
           
