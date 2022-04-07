@@ -221,4 +221,3 @@ SRS.settings = {
 };
 
 // TODO: find a way to implement 180 spins that doesn't rely on Nullpomino's kicks being stored with the tetromino data
-// TODO: find a way to enable/disable Arika wallkicks for I tetromino

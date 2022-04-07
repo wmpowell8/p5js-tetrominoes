@@ -65,7 +65,8 @@ function draw() {
 function MenuScene(menu) {
   return class {
     setup() {
-      createCanvas(640, 480);  
+      let c = createCanvas(windowWidth, windowHeight)
+      c.style("display", "block");
       this.menu = menu;
     }
   
@@ -95,6 +96,10 @@ function MenuScene(menu) {
       if (controls.menuLeft.includes(keyCode)) {
         this.menu.left();
       }
+    }
+
+    windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
     }
   };
 }
@@ -210,7 +215,7 @@ class GameStateGame {
   }
 
   setup() {
-    createCanvas(640, 480, WEBGL);
+    createCanvas(windowWidth, windowHeight, WEBGL).style("display", "block");
     
     this.initMillis = millis();
     
