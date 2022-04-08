@@ -106,15 +106,16 @@ ClassicMenu = MenuScene(new Menu(
   ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
   new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
   new Action("Start Game", function () {
+    let lineGoal = this.items[1].value;
     let settings = {
       startingLevelM1: this.items[0].value - 1,
-      lineGoal: this.items[1].value,
+      goal: new LineGoal(lineGoal),
       das: this.items[2].value,
       arr: this.items[3].value,
       generateHUDText: (game) => `Lines: ${game.lineCount}\nLevel: ${game.levelM1+1}\nScore: ${game.score}`
     };
     if (settings.startingLevelM1 >= settings.lineGoal / 10) {
-      alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
+      alert(`Error: Invalid Starting Level\nA starting level up to ${lineGoal / 10} may be chosen for a goal of ${lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${lineGoal / 10}.`);
       return;
     }
     SRS.settings.one80Spins = this.items[4].value;
@@ -138,17 +139,13 @@ ExtremeMenu = MenuScene(new Menu(
     let settings = {
       startingLevelM1: this.items[0].value - 1,
       updateLevel: (lv,lc) => min(max(lv, floor(lc / 10)), 29),
-      lineGoal: 300,
+      goal: new LineGoal(300),
       das: this.items[1].value,
       arr: this.items[2].value,
       gravity: (l) => 0,
       lockDelay: (l) => (31 - l) / 30 * (500 - settings.arr) + settings.arr,
       generateHUDText: (game) => `Lines: ${game.lineCount}\nLevel: M${game.levelM1+1}\nScore: ${game.score}`
     };
-    if (settings.startingLevelM1 >= settings.lineGoal / 10) {
-      alert(`Error: Invalid Starting Level\nA starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines. You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.`);
-      return;
-    }
     SRS.settings.one80Spins = this.items[3].value;
     SRS.settings.iKicks = this.items[4].value;
     mgr.showScene(GameStateGame, settings);
@@ -172,20 +169,12 @@ LineRaceMenu = MenuScene(new Menu(
     let settings = {
       startingLevelM1: 0,
       updateLevel: (lv,lc)=>lv,
-      lineGoal: this.items[0].value,
+      goal: new LineGoal(this.items[0].value),
       das: this.items[1].value,
       arr: this.items[2].value,
       lineClearDelay: (l) => this.items[3].value,
       generateHUDText: (game) => `Time: ${formatTime(game.time)}\nExcl. Delays: ${formatTime(game.timeExclDelays)}\nLines: ${game.lineCount}`
     };
-    if (settings.startingLevelM1 >= settings.lineGoal / 10) {
-      alert(`
-        Error: Invalid Starting Level\n
-        A starting level up to ${settings.lineGoal / 10} may be chosen for a goal of ${settings.lineGoal} lines.
-        You chose a starting level of ${settings.startingLevelM1 + 1}. Choose a starting level up to ${settings.lineGoal / 10}.
-      `);
-      return;
-    }
     SRS.settings.one80Spins = this.items[4].value;
     SRS.settings.iKicks = this.items[5].value;
     mgr.showScene(GameStateGame, settings);
@@ -675,7 +664,7 @@ class GameStateGame {
           rotateY(-(this.millisSinceInit()-1000)/500);
           pointLight(color("white"), 0, -(this.millisSinceInit()-1000), sqrt(120000));
         } else {
-          if (g.lineCount >= this.sceneArgs.lineGoal && g.linesToClear.length <= 0) throw new GameOverCondition("You win", `Line count has reached its goal (${this.sceneArgs.lineGoal} lines)`);
+          this.sceneArgs.goal.assertNotWon(g);
         
           // Manages soft drop
           
@@ -714,7 +703,7 @@ class GameStateGame {
           
         }
       } catch (error) {
-        if (error instanceof GameOverCondition) {
+        if (error instanceof GameOver) {
           this.gameOver = Object.assign(error, {millis: millis()});
         } else {
           setTimeout(function(){alert(`A(n) "${error.name}" exception occurred while updating the game state. Check the debug console for details.`)},0);

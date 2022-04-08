@@ -40,10 +40,10 @@ class Matrix {
     let lockOut = true;
     for (let i of t.getCurrentShape()) {
       if (-i.y<this.skyline) lockOut=false;
-      if (this.minoAtPos(i.x, i.y)) throw new GameOverCondition("Block out", "Tetromino must lock over empty space");
+      if (this.minoAtPos(i.x, i.y)) throw new GameOver("Block out", "Tetromino must lock over empty space");
       this.data[-i.y][i.x] = t.tetromino.color;
     }
-    if (lockOut) throw new GameOverCondition("Lock out", "Tetromino must not lock completely above Skyline");
+    if (lockOut) throw new GameOver("Lock out", "Tetromino must not lock completely above Skyline");
   }
   
   // Detects what lines need to be cleared.
