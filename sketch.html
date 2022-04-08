@@ -13,10 +13,17 @@
     <script src="GameOverCondition.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8">
-
+    <script>
+      // Credit to Tim Down on StackOverflow: https://stackoverflow.com/questions/3208021/prevent-scrolling-with-arrow-keys
+      document.onkeydown = function(evt) {
+        evt = evt || window.event;
+        var keyCode = evt.keyCode;
+        if (keyCode >= 37 && keyCode <= 40) {
+            return false;
+        }
+      };
+    </script>
   </head>
   <body>
     <script src="sketch.js"></script>
-  
-
 </body></html>
