@@ -2,16 +2,15 @@
     <script src="lib/p5.min.js"></script>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>-->
     <script src="lib/scenemanager.js"></script>
-    <script src="RS.js"></script>
-    <script src="SRS.js"></script>
-    <script src="Tetromino.js"></script>
-    <script src="PositionedTetromino.js"></script>
-    <script src="Matrix.js"></script>
-    <script src="GameManager.js"></script>
-    <script src="ScoringMessage.js"></script>
-    <script src="Menu.js"></script>
-    <script src="GameOverCondition.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="src/RS.js"></script>
+    <script src="src/SRS.js"></script>
+    <script src="src/Tetromino.js"></script>
+    <script src="src/PositionedTetromino.js"></script>
+    <script src="src/Matrix.js"></script>
+    <script src="src/GameManager.js"></script>
+    <script src="src/ScoringMessage.js"></script>
+    <script src="src/Menu.js"></script>
+    <script src="src/GameOverCondition.js"></script>
     <meta charset="utf-8">
     <script>
       // Credit to Tim Down on StackOverflow: https://stackoverflow.com/questions/3208021/prevent-scrolling-with-arrow-keys
@@ -23,7 +22,16 @@
         }
       };
     </script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
   </head>
   <body>
-    <script src="sketch.js"></script>
+    <script src="src/sketch.js"></script>
 </body></html>

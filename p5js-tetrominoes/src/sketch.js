@@ -28,7 +28,7 @@ var regularFont;
 var g;
 
 function preload() {
-  regularFont = loadFont("Roboto-Regular.ttf");
+  regularFont = loadFont("assets/Roboto-Regular.ttf");
 }
 
 

@@ -10,7 +10,7 @@
       resize: vertical;
     }
   </style>
-  <script src="lib/showdown.js"></script>
+  <script src="showdown.js"></script>
   <script>
     let converter = new showdown.Converter();
     fetch("README.md").then(response => response.text().then(string => readme.innerHTML = converter.makeHtml(string)));
@@ -21,7 +21,7 @@
 <body>
   <h1>P5.js Tetrominoes</h1>
   <button onclick="game.contentWindow.location.reload();">Reload game</button>
-  <div><iframe src="sketch.html" id="game" width="640" height="480"></iframe></div>
+  <div><iframe src="p5js-tetrominoes/game.html" id="game" width="640" height="480"></iframe></div>
   <h2>Readme</h2>
   Powered by <a href="https://github.com/showdownjs/showdown">showdown.js</a>
   <div id="readme"></div>
