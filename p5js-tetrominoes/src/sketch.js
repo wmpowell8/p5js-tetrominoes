@@ -99,6 +99,7 @@ function MenuScene(menu) {
 
 ModeSelectionMenu = MenuScene(new Menu(
   new Action("Classic", function () {mgr.showScene(ClassicMenu)}),
+  new Action("Endurance", function () {mgr.showScene(EnduranceMenu)}),
   new Action("Extreme", function () {mgr.showScene(ExtremeMenu)}),
   new Action("Line Race", function () {mgr.showScene(LineRaceMenu)}),
   new Action("Timed Challenge", function () {mgr.showScene(TimedChallengeMenu)})
@@ -131,6 +132,32 @@ ClassicMenu = MenuScene(new Menu(
     }
     SRS.settings.one80Spins = this.items[4].value;
     SRS.settings.iKicks = this.items[5].value;
+    mgr.showScene(GameStateGame, settings);
+  }, 1)
+));
+
+EnduranceMenu = MenuScene(new Menu(
+  new MenuRange("DAS", 10, 350, 10, "", "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "", "ms",  50),
+  new Choice("180° Spins", [
+    SRS.settings.one80SpinsEnum.DISABLED,
+    SRS.settings.one80SpinsEnum.NO_KICKS,
+    SRS.settings.one80SpinsEnum.TETRIO,
+    SRS.settings.one80SpinsEnum.NULLPOMINO
+  ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
+  new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
+  new Action("Start Game", function () {
+    let settings = {
+      startingLevelM1: 0,
+      updateLevel: (lv,lc) => min(max(lv, floor(lc / 10)), 49),
+      goal: new LineGoal(500),
+      das: this.items[0].value,
+      arr: this.items[1].value,
+      lockDelay: (l) => (31 - (l - 20)) / 30 * (500 - settings.arr) + settings.arr,
+      generateHUDText: (game) => `Lines: ${game.lineCount}\nLevel: ${game.levelM1 < 20 ? game.levelM1 + 1 : `M${game.levelM1 - 19}`}\nScore: ${game.score}`
+    };
+    SRS.settings.one80Spins = this.items[2].value;
+    SRS.settings.iKicks = this.items[3].value;
     mgr.showScene(GameStateGame, settings);
   }, 1)
 ));
@@ -207,7 +234,7 @@ TimedChallengeMenu = MenuScene(new Menu(
     let settings = {
       startingLevelM1: 0,
       updateLevel: (lv, lc) => lv,
-      goal: new WinCondition(g => g.time >= this.items[0].value, g => `Time (${formatTime(this.items[0].value)} has run out)`),
+      goal: new WinCondition(g => g.time >= this.items[0].value, g => `Time (${formatTime(this.items[0].value)}) has run out`),
       das: this.items[1].value,
       arr: this.items[2].value,
       generateHUDText: (game) => `Lines: ${game.lineCount}\nScore: ${game.score}\nTime Left: ${formatTime(this.items[0].value - game.time)}`
