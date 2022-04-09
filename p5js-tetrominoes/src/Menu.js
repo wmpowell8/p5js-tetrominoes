@@ -1,10 +1,11 @@
 class Menu {
+  /**
+   * Menu is a class for a graphical menu.
+   * Its constuctor Takes either an arbitrary number of MenuItem instances as
+   * arguments or an array of MenuItem instances. These instances serve as one item
+   * in the menu.
+   */
   constructor() {
-    /* Menu is a class for a graphical menu.
-     * Its constuctor Takes either an arbitrary number of MenuItem instances as
-     * arguments or an array of MenuItem instances. These instances serve as one item
-     * in the menu.
-     */
 
     // Manages whether the user inputted multiple MenuItem instances as arguments or an array of MenuItem instances
 
@@ -30,9 +31,8 @@ class Menu {
     }
   }
 
+  /** Shows the menu */
   show() {
-    // Shows the menu
-
     push();
 
     textAlign(LEFT, TOP);
@@ -49,15 +49,13 @@ class Menu {
     pop();
   }
 
+  /** navigates to the previous item */
   up() {
-    // navigates to the previous item
-
     this.selectedIndex = posMod(this.selectedIndex - 1, this.items.length);
   }
   
+  /** navigates to the next item */
   down() {
-    // navigates to the next item
-
     this.selectedIndex = (this.selectedIndex + 1) % this.items.length;
   }
 }
@@ -88,12 +86,27 @@ class MenuItem {
 }
 
 class Action extends MenuItem {
+  /**
+   * @param {string} text
+   * @param {Function} action
+   * @param {number} selectionPriority
+   */
   constructor(text = "Sample Text", action = function(){}, selectionPriority = 0) {
     super(function(isSelected){MenuItem.showText(isSelected, text)}, action, function(){}, function(){}, selectionPriority = selectionPriority);
   }
 }
 
 class MenuRange extends MenuItem {
+  /**
+   * @param {string} propertyName
+   * @param {number} min
+   * @param {number} max
+   * @param {number} step
+   * @param {string} prefix
+   * @param {string} suffix
+   * @param {number} defaultValue
+   * @param {number} selectionPriority
+   */
   constructor(propertyName, min = 1, max = Infinity, step = 1, prefix="", suffix = "", defaultValue = min, selectionPriority = 0) {
     // When x is a Number, p5.int(x) is x | 0
 
@@ -121,6 +134,13 @@ class MenuRange extends MenuItem {
 }
 
 class Choice extends MenuItem {
+  /**
+   * @param {string} propertyName
+   * @param {Array} values
+   * @param {Array} keys
+   * @param {number} defaultIndex
+   * @param {number} selectionPriority
+   */
   constructor(propertyName, values, keys = values, defaultIndex = 0, selectionPriority = 0) {
     super(
       (isSelected) => {

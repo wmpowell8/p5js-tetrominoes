@@ -1,5 +1,5 @@
 
-// An Object with the game's controls.
+/** An Object with the game's controls. */
 const controls = {
   translateRight: [39/*right*/],
   translateLeft:  [37/*left*/],
@@ -18,13 +18,21 @@ const controls = {
   menuBack:   [27/*esc*/, 8/*backspace*/, 46/*delete*/]
 };
 
-// A function like modulus, but that always returns a positive result.
+/**
+ * A function like modulus, but that always returns a positive result.
+ * @function posMod
+ * @param {number} divisor
+ * @param {number} dividend
+ * @returns {number}
+ */
 posMod = (divisor, dividend) => ((divisor % dividend) + dividend) % dividend; // a trick for ensuring the result is always positive
 
-// Helper function for formatting times
+/** Helper function for formatting times */
 formatTime = (time) => str(int(time/600000)) + int(time/60000 % 10) + ":" + int(time/10000 % 6) + int(time/1000 % 10) + "." + int(time/100 % 10) + int(time/10 % 10) + int(time % 10);
 
+/** @type {p5.Font} */
 var regularFont;
+/** @type {GameManager} */
 var g;
 
 function preload() {
@@ -43,8 +51,10 @@ function draw() {
   mgr.draw();
 }
 
-// Helper function for creating scenes that display menus
-
+/**
+ * Helper function for creating scenes that display menus
+ * @param {Menu} menu The menu to turn into a MenuScene
+ */
 function MenuScene(menu) {
   return class {
     setup() {
@@ -90,7 +100,8 @@ function MenuScene(menu) {
 ModeSelectionMenu = MenuScene(new Menu(
   new Action("Classic", function () {mgr.showScene(ClassicMenu)}),
   new Action("Extreme", function () {mgr.showScene(ExtremeMenu)}),
-  new Action("Line Race", function () {mgr.showScene(LineRaceMenu)})
+  new Action("Line Race", function () {mgr.showScene(LineRaceMenu)}),
+  new Action("Timed Challenge", function () {mgr.showScene(TimedChallengeMenu)})
 ));
 
 ClassicMenu = MenuScene(new Menu(
@@ -177,6 +188,32 @@ LineRaceMenu = MenuScene(new Menu(
     };
     SRS.settings.one80Spins = this.items[4].value;
     SRS.settings.iKicks = this.items[5].value;
+    mgr.showScene(GameStateGame, settings);
+  }, 1)
+));
+
+TimedChallengeMenu = MenuScene(new Menu(
+  new Choice("Game Duration", [60000, 120000, 180000, 240000, 300000], ["1 Minute", "2 Minutes", "3 Minutes", "4 Minutes", "5 Minutes"], 2),
+  new MenuRange("DAS", 10, 350, 10, "", "ms", 170),
+  new MenuRange("ARR",  0, 100, 10, "", "ms",  50),
+  new Choice("180° Spins", [
+    SRS.settings.one80SpinsEnum.DISABLED,
+    SRS.settings.one80SpinsEnum.NO_KICKS,
+    SRS.settings.one80SpinsEnum.TETRIO,
+    SRS.settings.one80SpinsEnum.NULLPOMINO
+  ], ["Disabled", "No Kicks", "TETR.IO", "Nullpomino"], SRS.settings.one80Spins),
+  new Choice("I Kicks", [SRS.settings.iKicksEnum.STANDARD, SRS.settings.iKicksEnum.ARIKA], ["Standard", "Arika"]),
+  new Action("Start Game", function () {
+    let settings = {
+      startingLevelM1: 0,
+      updateLevel: (lv, lc) => lv,
+      goal: new WinCondition(g => g.time >= this.items[0].value, g => `Time (${formatTime(this.items[0].value)} has run out)`),
+      das: this.items[1].value,
+      arr: this.items[2].value,
+      generateHUDText: (game) => `Lines: ${game.lineCount}\nScore: ${game.score}\nTime Left: ${formatTime(this.items[0].value - game.time)}`
+    };
+    SRS.settings.one80Spins = this.items[3].value;
+    SRS.settings.iKicks = this.items[4].value;
     mgr.showScene(GameStateGame, settings);
   }, 1)
 ));

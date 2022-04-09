@@ -6,7 +6,7 @@ class WinCondition {
    * @param {WinConditionMetCallback} conditionMet A callback function to check whether the win condition has been met
    * @param {WinConditionMessageCallback} generateMessage A callback function to generate the message to be displayed when the condition is met
    */
-  constructor(conditionMet, generateMessage) {
+  constructor(conditionMet = ()=>{}, generateMessage = ()=>{}) {
     /**
      * @private
      * @type {WinConditionMetCallback}
