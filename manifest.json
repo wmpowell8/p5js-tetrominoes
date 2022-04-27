@@ -8,8 +8,8 @@
             "sizes": "512x512"
         }
     ],
-    "start-url": "/",
+    "start-url": "./",
     "background_color": "white",
     "display": "minimal-ui",
-    "scope": "/"
+    "scope": "./"
 }

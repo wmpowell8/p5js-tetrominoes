@@ -30,7 +30,7 @@
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register('/sw.js')
+        .register('./sw.js')
         .then(function() { console.log("%cService Worker Registered", "color: green;", arguments); })
         .catch(function () {
           console.log("%cAn error occurred while registering the service worker", "color: red;");
