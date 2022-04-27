@@ -1,0 +1,15 @@
+{
+    "name": "P5.js Tetrominoes",
+    "description": "Puzzle stacker clone",
+    "icons": [
+        {
+            "src": "icon.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start-url": "/",
+    "background_color": "white",
+    "display": "minimal-ui",
+    "scope": "/"
+}

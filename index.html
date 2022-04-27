@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="manifest.json">
   <style>
     #readme {
       border: 4px double;
@@ -25,5 +26,13 @@
   <h2>Readme</h2>
   Powered by <a href="https://github.com/showdownjs/showdown">showdown.js</a>
   <div id="readme"></div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then(function() { console.log("Service Worker Registered"); });
+    }
+  </script>
 </body>
 </html>
