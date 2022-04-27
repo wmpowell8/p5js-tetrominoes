@@ -33,3 +33,17 @@ self.addEventListener('install', function(e) {
   );
   console.log("%cProgressive Web App (PWA) Successfully Installed", "color: green;");
 });
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(async function() {
+    try{
+    let res = await fetch(event.request);
+      let cache = await caches.open('cache');
+      cache.put(event.request.url, res.clone());
+      return res;
+    }
+    catch(error){
+      return caches.match(event.request);
+    }
+  }());
+});

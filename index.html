@@ -16,6 +16,9 @@
     let converter = new showdown.Converter();
     fetch("README.md").then(response => response.text().then(string => readme.innerHTML = converter.makeHtml(string)));
   </script>
+  
+  <link rel="apple-touch-icon" href="icon.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale: 1">
   <meta charset="UTF-8">
   <title>P5.js Tetrominoes</title>
 </head>
