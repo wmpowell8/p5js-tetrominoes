@@ -31,16 +31,18 @@
   <div id="readme"></div>
 
   <script>
+    var PWA_DEBUG = false;
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register('./sw.js')
-        .then(function() { console.log("%cService Worker Registered", "color: green;", arguments); })
+        .then(function() { if (PWA_DEBUG) console.log("%cService Worker Registered", "color: green;", arguments); })
         .catch(function () {
-          console.log("%cAn error occurred while registering the service worker", "color: red;");
-          console.log("%c", "color: red;", arguments);
+          if (PWA_DEBUG) console.log("%cAn error occurred while registering the service worker", "color: red;");
+          if (PWA_DEBUG) console.log("%c", "color: red;", arguments);
         });
     } else {
-      console.log("%cUnable to registrer service worker", "color: orange;");
+      if (PWA_DEBUG) console.log("%cUnable to registrer service worker", "color: orange;");
     }
   </script>
 </body>

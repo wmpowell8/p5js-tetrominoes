@@ -2,7 +2,7 @@
 
 
 self.addEventListener('install', function(e) {
-  console.log("%cInstalling Progressive Web App (PWA)", "color: purple;");
+  if (PWA_DEBUG) console.log("%cInstalling Progressive Web App (PWA)", "color: purple;");
   e.waitUntil(
     caches.open('p5js-tetrominoes').then(function(cache) {
       return cache.addAll([
@@ -31,7 +31,7 @@ self.addEventListener('install', function(e) {
       ]);
     })
   );
-  console.log("%cProgressive Web App (PWA) Successfully Installed", "color: green;");
+  if (PWA_DEBUG) console.log("%cProgressive Web App (PWA) Successfully Installed", "color: green;");
 });
 
 self.addEventListener('fetch', function(event) {
